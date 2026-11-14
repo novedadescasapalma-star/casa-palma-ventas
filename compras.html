@@ -4,6 +4,50 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Casa Palma | Registro de Compras</title>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNjqlY8Nrogg32QTZ2uOKcF8KFgBknT74",
+    authDomain: "casa-palma-2dccc.firebaseapp.com",
+    projectId: "casa-palma-2dccc",
+    storageBucket: "casa-palma-2dccc.firebasestorage.app",
+    messagingSenderId: "719157376229",
+    appId: "1:719157376229:web:3e02e634934b69472dd00c",
+    measurementId: "G-W77XSSYQKM"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  window.APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpmNpDDonwPnGXDUiCqaE2C3vunAz9-9CiUqlnH7qGeZ8ksz7xHZyb4WTi9kgWatnSzA/exec";
+
+  window.ejecutarLogin = async function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    const errorBox = document.getElementById('loginError');
+    errorBox.style.display = 'none';
+    if (!email || !pass) { errorBox.textContent = 'Introduce correo y contraseña.'; errorBox.style.display = 'block'; return; }
+    try { await signInWithEmailAndPassword(auth, email, pass); } catch (error) { errorBox.textContent = 'Credenciales incorrectas.'; errorBox.style.display = 'block'; }
+  };
+
+  onAuthStateChanged(auth, (user) => {
+    const overlay = document.getElementById('loginOverlay');
+    const infoUsuario = document.getElementById('infoUsuarioSesion');
+    if (user) {
+      overlay.style.display = 'none';
+      if (infoUsuario) infoUsuario.textContent = 'Sesión: ' + user.email;
+      if (!window.__formularioIniciado) {
+        window.__formularioIniciado = true;
+        setTimeout(() => { if (typeof window.iniciarCompras === 'function') window.iniciarCompras(); }, 300);
+      }
+    } else {
+      overlay.style.display = 'flex';
+      if (infoUsuario) infoUsuario.textContent = 'Inicia sesión';
+    }
+  });
+</script>
 <style>
 :root{--verde:#173f35;--verde2:#245d4e;--fondo:#f3f6f4;--borde:#d9e2dd;--texto:#20312b;--gris:#65736c;--rojo:#a52d2d;--amarillo:#fff8e5}
 *{box-sizing:border-box}
@@ -53,11 +97,26 @@ td input.articulo,td input.marca,td input.color,td input.talla,td input.estado,t
 .resumen-tabla{min-width:650px}
 .modal-acciones{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}
 .advertencia{background:var(--amarillo);padding:11px;border-radius:8px;margin:12px 0;font-size:13px}
-.btn-volver {color: var(--verde); text-decoration: none; font-weight: bold; margin-right: 20px; font-size: 14px;}
+.btn-volver {color: white; text-decoration: none; font-weight: bold; margin-right: 20px; font-size: 14px; background: #245d4e; padding: 5px 10px; border-radius: 4px;}
 @media(max-width:750px){body{padding:7px}.contenido{padding:12px}.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" style="display:flex;position:fixed;inset:0;z-index:10000;background:rgba(23,63,53,0.95);align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:14px;padding:30px;max-width:380px;width:100%;box-shadow:0 15px 35px rgba(0,0,0,0.3);text-align:center;">
+    <h2 style="margin:0 0 6px;color:#173f35;font-size:24px;">Casa Palma</h2>
+    <p style="margin:0 0 20px;color:#65736b;font-size:13px;">Control de Acceso a Compras</p>
+    <div style="text-align:left;display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      <div class="campo"><label for="loginEmail">Correo electrónico</label><input id="loginEmail" type="email" placeholder="usuario@casapalma.app"></div>
+      <div class="campo"><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" placeholder="••••••••"></div>
+    </div>
+    <button type="button" onclick="ejecutarLogin()" style="width:100%;padding:12px;background:#173f35;color:white;border:0;border-radius:7px;font-weight:bold;font-size:15px;cursor:pointer;">Iniciar Sesión</button>
+    <div id="loginError" style="margin-top:12px;color:#b42318;font-size:13px;display:none;"></div>
+  </div>
+</div>
+
 <div class="contenedor">
 <header class="cabecera">
   <div>
@@ -65,6 +124,7 @@ td input.articulo,td input.marca,td input.color,td input.talla,td input.estado,t
     <div class="sub">MODA &amp; NOVEDADES</div>
   </div>
   <div style="display:flex; align-items:center;">
+    <div id="infoUsuarioSesion" style="color:white;font-size:11px;margin-right:15px;opacity:0.8;"></div>
     <a href="menu.html" class="btn-volver">&larr; Menú</a>
     <div class="titulo">REGISTRO DE COMPRAS</div>
   </div>
@@ -73,41 +133,16 @@ td input.articulo,td input.marca,td input.color,td input.talla,td input.estado,t
 <main class="contenido">
 <div class="seccion">1. Datos generales de la compra</div>
 <div class="grid">
-  <div class="campo">
-    <label for="fecha">FECHA *</label>
-    <input id="fecha" type="date" required>
-  </div>
-  <div class="campo">
-    <label for="numeroCompra">COMPRA NO. (automático)</label>
-    <input id="numeroCompra" value="Calculando…" readonly>
-  </div>
-  <div class="campo">
-    <label for="pedido">PEDIDO PROVEEDOR NO. *</label>
-    <input id="pedido" placeholder="Número de pedido de Amazon, AliExpress, etc." required>
-  </div>
+  <div class="campo"><label for="fecha">FECHA *</label><input id="fecha" type="date" required></div>
+  <div class="campo"><label for="numeroCompra">COMPRA NO. (automático)</label><input id="numeroCompra" value="Calculando…" readonly></div>
+  <div class="campo"><label for="pedido">PEDIDO PROVEEDOR NO. *</label><input id="pedido" placeholder="Número de pedido de Amazon, AliExpress, etc." required></div>
 </div>
 
 <div class="seccion">2. Artículos de la compra</div>
 <div class="tabla-wrap">
 <table>
 <thead>
-<tr>
-<th>SKU / BUSCAR ARTÍCULO *</th>
-<th>ARTÍCULO</th>
-<th>MARCA</th>
-<th>COLOR</th>
-<th>TALLA</th>
-<th>PROVEEDOR *</th>
-<th>CANTIDAD *</th>
-<th>MONEDA *</th>
-<th>PRECIO UNIT. *</th>
-<th>TIPO USD/COP</th>
-<th>TOTAL COP</th>
-<th>ESTADO</th>
-<th>ETIQUETADO</th>
-<th>NOTA</th>
-<th></th>
-</tr>
+<tr><th>SKU / BUSCAR ARTÍCULO *</th><th>ARTÍCULO</th><th>MARCA</th><th>COLOR</th><th>TALLA</th><th>PROVEEDOR *</th><th>CANTIDAD *</th><th>MONEDA *</th><th>PRECIO UNIT. *</th><th>TIPO USD/COP</th><th>TOTAL COP</th><th>ESTADO</th><th>ETIQUETADO</th><th>NOTA</th><th></th></tr>
 </thead>
 <tbody id="filas"></tbody>
 </table>
@@ -119,14 +154,8 @@ td input.articulo,td input.marca,td input.color,td input.talla,td input.estado,t
 </div>
 
 <div class="resumen">
-  <div class="total">
-    <small>ARTÍCULOS / UNIDADES</small>
-    <strong id="conteo">0 / 0</strong>
-  </div>
-  <div class="total">
-    <small>TOTAL GENERAL (COP)</small>
-    <strong id="totalGeneral">$ 0</strong>
-  </div>
+  <div class="total"><small>ARTÍCULOS / UNIDADES</small><strong id="conteo">0 / 0</strong></div>
+  <div class="total"><small>TOTAL GENERAL (COP)</small><strong id="totalGeneral">$ 0</strong></div>
 </div>
 
 <div class="pie">
@@ -148,57 +177,31 @@ td input.articulo,td input.marca,td input.color,td input.talla,td input.estado,t
 </div>
 
 <script>
-// --- CONFIGURACIÓN ---
-// ¡IMPORTANTE! Asegúrate de poner aquí la URL de tu Web App
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpmNpDDonwPnGXDUiCqaE2C3vunAz9-9CiUqlnH7qGeZ8ksz7xHZyb4WTi9kgWatnSzA/exec";
-
 const monedaFmt = new Intl.NumberFormat('es-CO',{minimumFractionDigits:0,maximumFractionDigits:2});
 let catalogos={proveedores:[],articulos:[]};
 let compraEnProceso=false;
+let fechaEl = document.getElementById('fecha');
 
-function hoyLocal(){
-  const d=new Date();
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
-
-const fechaEl = document.getElementById('fecha');
-
-function inicializarFechaCompra() {
-  if (!fechaEl.value) {
-    fechaEl.value = hoyLocal();
-  }
-  actualizarNumeroCompra();
-}
-
+function hoyLocal(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function inicializarFechaCompra() { if (!fechaEl.value) fechaEl.value = hoyLocal(); actualizarNumeroCompra(); }
 fechaEl.addEventListener('change', actualizarNumeroCompra);
+function dinero(v){ return '$ '+monedaFmt.format(Number(v)||0); }
+function mostrarEstado(texto,tipo=''){ const el=document.getElementById('estadoGeneral'); el.textContent=texto; el.className='estado '+tipo; }
 
-function dinero(v){
-  return '$ '+monedaFmt.format(Number(v)||0);
-}
-
-function mostrarEstado(texto,tipo=''){
-  const el=document.getElementById('estadoGeneral');
-  el.textContent=texto;
-  el.className='estado '+tipo;
-}
-
-// --- CARGA DE CATÁLOGOS ---
-async function cargarCatalogos(){
+window.iniciarCompras = async function() {
+  inicializarFechaCompra();
   document.getElementById('guardar').disabled=true;
   document.getElementById('anadir').disabled=true;
   mostrarEstado('Cargando listas de artículos y proveedores…');
 
   try {
-    const url = APPS_SCRIPT_URL + '?accion=obtenerCatalogosCompras&t=' + Date.now();
+    const url = window.APPS_SCRIPT_URL + '?accion=obtenerCatalogosCompras&t=' + Date.now();
     const res = await fetch(url);
     const r = await res.json();
-
     catalogos = r || {proveedores:[],articulos:[]};
-    
     document.getElementById('guardar').disabled=false;
     document.getElementById('anadir').disabled=false;
     mostrarEstado('Catálogos cargados: '+catalogos.articulos.length+' artículos y '+catalogos.proveedores.length+' proveedores.');
-
     document.getElementById('filas').innerHTML='';
     agregarFila();
     actualizarNumeroCompra();
@@ -206,20 +209,14 @@ async function cargarCatalogos(){
     mostrarEstado('No se pudieron cargar las listas: '+mensajeError(e),'error');
     document.getElementById('guardar').disabled=true;
   }
-}
+};
 
-// --- CONSECUTIVO ---
 async function actualizarNumeroCompra(){
   const fecha=fechaEl.value;
-  if(!fecha){
-    document.getElementById('numeroCompra').value='Selecciona la fecha';
-    return;
-  }
-
+  if(!fecha){ document.getElementById('numeroCompra').value='Selecciona la fecha'; return; }
   document.getElementById('numeroCompra').value='Calculando…';
-
   try {
-    const url = APPS_SCRIPT_URL + '?accion=obtenerSiguienteNumeroCompra&fecha=' + fecha + '&t=' + Date.now();
+    const url = window.APPS_SCRIPT_URL + '?accion=obtenerSiguienteNumeroCompra&fecha=' + fecha + '&t=' + Date.now();
     const res = await fetch(url);
     const n = await res.json();
     document.getElementById('numeroCompra').value = n.numero || 'Se asigna al guardar';
@@ -229,327 +226,83 @@ async function actualizarNumeroCompra(){
   }
 }
 
-function mensajeError(e){
-  return e&&e.message?e.message:String(e||'Error desconocido');
-}
-
-function crearInput(clase,placeholder,type='text',value=''){
-  const el=document.createElement('input');
-  el.className=clase;
-  el.placeholder=placeholder;
-  el.type=type;
-  if(value!==undefined)el.value=value;
-  return el;
-}
-
-function celda(tr,child){
-  const td=document.createElement('td');
-  td.appendChild(child);
-  tr.appendChild(td);
-  return td;
-}
-
-function crearSelect(clase,opciones){
-  const s=document.createElement('select');
-  s.className=clase;
-  opciones.forEach(([v,t])=>{
-    const o=document.createElement('option');
-    o.value=v;
-    o.textContent=t;
-    s.appendChild(o);
-  });
-  return s;
-}
+function mensajeError(e){ return e&&e.message?e.message:String(e||'Error desconocido'); }
+function crearInput(clase,placeholder,type='text',value=''){ const el=document.createElement('input'); el.className=clase; el.placeholder=placeholder; el.type=type; if(value!==undefined)el.value=value; return el; }
+function celda(tr,child){ const td=document.createElement('td'); td.appendChild(child); tr.appendChild(td); return td; }
+function crearSelect(clase,opciones){ const s=document.createElement('select'); s.className=clase; opciones.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; s.appendChild(o); }); return s; }
 
 function agregarFila(){
   const tbody=document.getElementById('filas');
   const filasActuales=Array.from(tbody.querySelectorAll('tr'));
-
-  if(filasActuales.length && !lineaCompleta(filasActuales[filasActuales.length-1])){
-    mostrarEstado('Completa la línea anterior antes de añadir otro artículo.','error');
-    return;
-  }
-
+  if(filasActuales.length && !lineaCompleta(filasActuales[filasActuales.length-1])){ mostrarEstado('Completa la línea anterior antes de añadir otro artículo.','error'); return; }
   const tr=document.createElement('tr');
-
   const tdSku=document.createElement('td');
-  const wrap=document.createElement('div');
-  wrap.className='sku-wrap';
-
-  const skuInput=crearInput('sku-busqueda','Escribe SKU o artículo…');
-  skuInput.autocomplete='off';
-  wrap.appendChild(skuInput);
-
-  const sugerencias=document.createElement('div');
-  sugerencias.className='sugerencias oculto';
-  wrap.appendChild(sugerencias);
-  tdSku.appendChild(wrap);
-  tr.appendChild(tdSku);
-
-  [['articulo','Artículo'],['marca','Marca'],['color','Color'],['talla','Talla']].forEach(([c,p])=>{
-    const el=crearInput(c,p);
-    el.readOnly=true;
-    celda(tr,el);
-  });
-
+  const wrap=document.createElement('div'); wrap.className='sku-wrap';
+  const skuInput=crearInput('sku-busqueda','Escribe SKU o artículo…'); skuInput.autocomplete='off'; wrap.appendChild(skuInput);
+  const sugerencias=document.createElement('div'); sugerencias.className='sugerencias oculto'; wrap.appendChild(sugerencias);
+  tdSku.appendChild(wrap); tr.appendChild(tdSku);
+  [['articulo','Artículo'],['marca','Marca'],['color','Color'],['talla','Talla']].forEach(([c,p])=>{ const el=crearInput(c,p); el.readOnly=true; celda(tr,el); });
   const prov=crearInput('proveedor','Buscar proveedor…');
-  const provSug=document.createElement('div');
-  provSug.className='sugerencias oculto';
-  const tdProv=celda(tr,document.createElement('div'));
-  tdProv.className='sku-wrap';
-  tdProv.appendChild(prov);
-  tdProv.appendChild(provSug);
-
-  const cant=crearInput('cantidad','1','number','1');
-  cant.min='1';
-  cant.step='1';
-  celda(tr,cant);
-
+  const provSug=document.createElement('div'); provSug.className='sugerencias oculto';
+  const tdProv=celda(tr,document.createElement('div')); tdProv.className='sku-wrap'; tdProv.appendChild(prov); tdProv.appendChild(provSug);
+  const cant=crearInput('cantidad','1','number','1'); cant.min='1'; cant.step='1'; celda(tr,cant);
   celda(tr,crearSelect('moneda',[['COP','COP'],['USD','USD']]));
-
-  const precio=crearInput('precio','Precio unitario','number','');
-  precio.min='0';
-  precio.step='any';
-  celda(tr,precio);
-
-  const tasa=crearInput('tasa','Tasa USD/COP','number','');
-  tasa.min='0';
-  tasa.step='any';
-  tasa.disabled=true;
-  celda(tr,tasa);
-
-  const total=document.createElement('div');
-  total.className='total-linea total-cop';
-  total.textContent=dinero(0);
-  celda(tr,total);
-
-  const estado=crearInput('estado','Pedido','text','Pedido');
-  estado.readOnly=true;
-  celda(tr,estado);
-
-  const etiquetado=crearInput('etiquetado','No','text','No');
-  etiquetado.readOnly=true;
-  celda(tr,etiquetado);
-
+  const precio=crearInput('precio','Precio unitario','number',''); precio.min='0'; precio.step='any'; celda(tr,precio);
+  const tasa=crearInput('tasa','Tasa USD/COP','number',''); tasa.min='0'; tasa.step='any'; tasa.disabled=true; celda(tr,tasa);
+  const total=document.createElement('div'); total.className='total-linea total-cop'; total.textContent=dinero(0); celda(tr,total);
+  const estado=crearInput('estado','Pedido','text','Pedido'); estado.readOnly=true; celda(tr,estado);
+  const etiquetado=crearInput('etiquetado','No','text','No'); etiquetado.readOnly=true; celda(tr,etiquetado);
   celda(tr,crearInput('nota','Nota opcional'));
-
-  const borrar=document.createElement('button');
-  borrar.type='button';
-  borrar.className='acciones-linea';
-  borrar.textContent='×';
-  borrar.title='Eliminar línea';
-  borrar.onclick=()=>{
-    tr.remove();
-    actualizarTotales();
-    actualizarBotonAnadir();
-  };
-  celda(tr,borrar);
-
+  const borrar=document.createElement('button'); borrar.type='button'; borrar.className='acciones-linea'; borrar.textContent='×'; borrar.title='Eliminar línea';
+  borrar.onclick=()=>{ tr.remove(); actualizarTotales(); actualizarBotonAnadir(); }; celda(tr,borrar);
   tbody.appendChild(tr);
-
-  skuInput.addEventListener('input',()=>{
-    delete tr.dataset.skuSeleccionado;
-    tr.querySelector('.articulo').value='';
-    tr.querySelector('.marca').value='';
-    tr.querySelector('.color').value='';
-    tr.querySelector('.talla').value='';
-    buscarSugerenciasArticulo(tr);
-    actualizarBotonAnadir();
-  });
+  skuInput.addEventListener('input',()=>{ delete tr.dataset.skuSeleccionado; tr.querySelector('.articulo').value=''; tr.querySelector('.marca').value=''; tr.querySelector('.color').value=''; tr.querySelector('.talla').value=''; buscarSugerenciasArticulo(tr); actualizarBotonAnadir(); });
   skuInput.addEventListener('focus',()=>buscarSugerenciasArticulo(tr));
-
-  prov.addEventListener('input',()=>{
-    delete tr.dataset.proveedorSeleccionado;
-    buscarSugerenciasProveedor(tr);
-    actualizarBotonAnadir();
-  });
+  prov.addEventListener('input',()=>{ delete tr.dataset.proveedorSeleccionado; buscarSugerenciasProveedor(tr); actualizarBotonAnadir(); });
   prov.addEventListener('focus',()=>buscarSugerenciasProveedor(tr));
-
-  tr.querySelectorAll('input,select').forEach(el=>{
-    el.addEventListener('input',()=>{
-      if(el.classList.contains('sku-busqueda')||el.classList.contains('proveedor'))return;
-      actualizarFila(tr);
-      actualizarTotales();
-      actualizarBotonAnadir();
-    });
-  });
-
-  tr.querySelector('.moneda').addEventListener('change',()=>{
-    const usd=tr.querySelector('.moneda').value==='USD';
-    tasa.disabled=!usd;
-    if(!usd)tasa.value='';
-    actualizarFila(tr);
-    actualizarTotales();
-    actualizarBotonAnadir();
-  });
-
-  document.addEventListener('click',function(e){
-    if(!wrap.contains(e.target))sugerencias.classList.add('oculto');
-    if(!tdProv.contains(e.target))provSug.classList.add('oculto');
-  });
-
-  actualizarFila(tr);
-  actualizarTotales();
-  actualizarBotonAnadir();
-  skuInput.focus();
+  tr.querySelectorAll('input,select').forEach(el=>{ el.addEventListener('input',()=>{ if(el.classList.contains('sku-busqueda')||el.classList.contains('proveedor'))return; actualizarFila(tr); actualizarTotales(); actualizarBotonAnadir(); }); });
+  tr.querySelector('.moneda').addEventListener('change',()=>{ const usd=tr.querySelector('.moneda').value==='USD'; tasa.disabled=!usd; if(!usd)tasa.value=''; actualizarFila(tr); actualizarTotales(); actualizarBotonAnadir(); });
+  document.addEventListener('click',function(e){ if(!wrap.contains(e.target))sugerencias.classList.add('oculto'); if(!tdProv.contains(e.target))provSug.classList.add('oculto'); });
+  actualizarFila(tr); actualizarTotales(); actualizarBotonAnadir(); skuInput.focus();
 }
 
 function buscarSugerenciasArticulo(tr){
-  const input=tr.querySelector('.sku-busqueda');
-  const box=tr.querySelector('.sugerencias');
-  const q=input.value.trim().toLocaleLowerCase();
-  box.innerHTML='';
-
-  if(!q){
-    box.classList.add('oculto');
-    return;
-  }
-
-  const matches=catalogos.articulos.filter(a=>
-    (a.descripcionCompleta+' '+a.sku+' '+a.articulo+' '+a.marca+' '+a.color+' '+a.talla)
-      .toLocaleLowerCase().includes(q)
-  ).slice(0,30);
-
-  if(!matches.length){
-    const d=document.createElement('div');
-    d.className='sugerencia';
-    d.textContent='No hay coincidencias';
-    box.appendChild(d);
-    box.classList.remove('oculto');
-    return;
-  }
-
-  matches.forEach(a=>{
-    const b=document.createElement('button');
-    b.type='button';
-    b.className='sugerencia';
-    b.textContent=a.descripcionCompleta;
-    b.onmousedown=e=>e.preventDefault();
-    b.onclick=()=>seleccionarArticulo(tr,a);
-    box.appendChild(b);
-  });
-
+  const input=tr.querySelector('.sku-busqueda'); const box=tr.querySelector('.sugerencias'); const q=input.value.trim().toLocaleLowerCase(); box.innerHTML='';
+  if(!q){ box.classList.add('oculto'); return; }
+  const matches=catalogos.articulos.filter(a=>(a.descripcionCompleta+' '+a.sku+' '+a.articulo+' '+a.marca+' '+a.color+' '+a.talla).toLocaleLowerCase().includes(q)).slice(0,30);
+  if(!matches.length){ const d=document.createElement('div'); d.className='sugerencia'; d.textContent='No hay coincidencias'; box.appendChild(d); box.classList.remove('oculto'); return; }
+  matches.forEach(a=>{ const b=document.createElement('button'); b.type='button'; b.className='sugerencia'; b.textContent=a.descripcionCompleta; b.onmousedown=e=>e.preventDefault(); b.onclick=()=>seleccionarArticulo(tr,a); box.appendChild(b); });
   box.classList.remove('oculto');
 }
 
 function seleccionarArticulo(tr,a){
-  tr.querySelector('.sku-busqueda').value=a.sku;
-  tr.querySelector('.articulo').value=a.articulo;
-  tr.querySelector('.marca').value=a.marca;
-  tr.querySelector('.color').value=a.color;
-  tr.querySelector('.talla').value=a.talla;
-  tr.querySelector('.sugerencias').classList.add('oculto');
-  tr.dataset.skuSeleccionado=a.sku;
-  actualizarBotonAnadir();
+  tr.querySelector('.sku-busqueda').value=a.sku; tr.querySelector('.articulo').value=a.articulo; tr.querySelector('.marca').value=a.marca; tr.querySelector('.color').value=a.color; tr.querySelector('.talla').value=a.talla; tr.querySelector('.sugerencias').classList.add('oculto'); tr.dataset.skuSeleccionado=a.sku; actualizarBotonAnadir();
 }
 
 function buscarSugerenciasProveedor(tr){
-  const input=tr.querySelector('.proveedor');
-  const box=tr.querySelectorAll('.sugerencias')[1];
-  const q=input.value.trim().toLocaleLowerCase();
-  box.innerHTML='';
-
-  if(!q){
-    box.classList.add('oculto');
-    return;
-  }
-
+  const input=tr.querySelector('.proveedor'); const box=tr.querySelectorAll('.sugerencias')[1]; const q=input.value.trim().toLocaleLowerCase(); box.innerHTML='';
+  if(!q){ box.classList.add('oculto'); return; }
   const matches=catalogos.proveedores.filter(p=>p.toLocaleLowerCase().includes(q)).slice(0,30);
-
-  if(!matches.length){
-    const d=document.createElement('div');
-    d.className='sugerencia';
-    d.textContent='No hay proveedores coincidentes.';
-    box.appendChild(d);
-    box.classList.remove('oculto');
-    return;
-  }
-
-  matches.forEach(p=>{
-    const b=document.createElement('button');
-    b.type='button';
-    b.className='sugerencia';
-    b.textContent=p;
-    b.onmousedown=e=>e.preventDefault();
-    b.onclick=()=>{
-      input.value=p;
-      tr.dataset.proveedorSeleccionado=p;
-      box.classList.add('oculto');
-      actualizarBotonAnadir();
-    };
-    box.appendChild(b);
-  });
-
+  if(!matches.length){ const d=document.createElement('div'); d.className='sugerencia'; d.textContent='No hay proveedores coincidentes.'; box.appendChild(d); box.classList.remove('oculto'); return; }
+  matches.forEach(p=>{ const b=document.createElement('button'); b.type='button'; b.className='sugerencia'; b.textContent=p; b.onmousedown=e=>e.preventDefault(); b.onclick=()=>{ input.value=p; tr.dataset.proveedorSeleccionado=p; box.classList.add('oculto'); actualizarBotonAnadir(); }; box.appendChild(b); });
   box.classList.remove('oculto');
 }
 
-function valoresFila(tr){
-  const moneda=tr.querySelector('.moneda').value;
-  const cantidad=Number(tr.querySelector('.cantidad').value)||0;
-  const precio=Number(tr.querySelector('.precio').value)||0;
-  const tasa=moneda==='USD'?(Number(tr.querySelector('.tasa').value)||0):1;
-  return {moneda,cantidad,precio,tasa,totalCOP:precio*cantidad*tasa};
-}
-
-function actualizarFila(tr){
-  tr.querySelector('.total-cop').textContent=dinero(valoresFila(tr).totalCOP);
-}
-
-function actualizarTotales(){
-  let total=0,unidades=0;
-  const trs=Array.from(document.querySelectorAll('#filas tr'));
-  trs.forEach(tr=>{
-    actualizarFila(tr);
-    const v=valoresFila(tr);
-    total+=v.totalCOP;
-    unidades+=v.cantidad;
-  });
-  document.getElementById('totalGeneral').textContent=dinero(total);
-  document.getElementById('conteo').textContent=trs.length+' / '+unidades;
-}
-
-function lineaCompleta(tr){
-  const sku=String(tr.dataset.skuSeleccionado||'').trim();
-  const proveedor=String(tr.dataset.proveedorSeleccionado||'').trim();
-  const cantidad=Number(tr.querySelector('.cantidad').value);
-  const precio=Number(tr.querySelector('.precio').value);
-  const moneda=tr.querySelector('.moneda').value;
-  const tasa=Number(tr.querySelector('.tasa').value);
-
-  return !!sku&&!!proveedor&&Number.isInteger(cantidad)&&cantidad>0&&
-    Number.isFinite(precio)&&precio>0&&
-    (moneda==='COP'||(moneda==='USD'&&Number.isFinite(tasa)&&tasa>0));
-}
-
-function actualizarBotonAnadir(){
-  const trs=Array.from(document.querySelectorAll('#filas tr'));
-  const btn=document.getElementById('anadir');
-  btn.disabled=trs.length>0&&!lineaCompleta(trs[trs.length-1]);
-}
+function valoresFila(tr){ const moneda=tr.querySelector('.moneda').value; const cantidad=Number(tr.querySelector('.cantidad').value)||0; const precio=Number(tr.querySelector('.precio').value)||0; const tasa=moneda==='USD'?(Number(tr.querySelector('.tasa').value)||0):1; return {moneda,cantidad,precio,tasa,totalCOP:precio*cantidad*tasa}; }
+function actualizarFila(tr){ tr.querySelector('.total-cop').textContent=dinero(valoresFila(tr).totalCOP); }
+function actualizarTotales(){ let total=0,unidades=0; const trs=Array.from(document.querySelectorAll('#filas tr')); trs.forEach(tr=>{ actualizarFila(tr); const v=valoresFila(tr); total+=v.totalCOP; unidades+=v.cantidad; }); document.getElementById('totalGeneral').textContent=dinero(total); document.getElementById('conteo').textContent=trs.length+' / '+unidades; }
+function lineaCompleta(tr){ const sku=String(tr.dataset.skuSeleccionado||'').trim(); const proveedor=String(tr.dataset.proveedorSeleccionado||'').trim(); const cantidad=Number(tr.querySelector('.cantidad').value); const precio=Number(tr.querySelector('.precio').value); const moneda=tr.querySelector('.moneda').value; const tasa=Number(tr.querySelector('.tasa').value); return !!sku&&!!proveedor&&Number.isInteger(cantidad)&&cantidad>0&&Number.isFinite(precio)&&precio>0&&(moneda==='COP'||(moneda==='USD'&&Number.isFinite(tasa)&&tasa>0)); }
+function actualizarBotonAnadir(){ const trs=Array.from(document.querySelectorAll('#filas tr')); const btn=document.getElementById('anadir'); btn.disabled=trs.length>0&&!lineaCompleta(trs[trs.length-1]); }
 
 function datosFormulario(){
-  return {
-    fecha:fechaEl.value,
-    pedido:document.getElementById('pedido').value.trim(),
-    items:Array.from(document.querySelectorAll('#filas tr')).map(tr=>({
-      sku:String(tr.dataset.skuSeleccionado||'').trim(),
-      proveedor:String(tr.dataset.proveedorSeleccionado||'').trim(),
-      cantidad:tr.querySelector('.cantidad').value,
-      moneda:tr.querySelector('.moneda').value,
-      precio:tr.querySelector('.precio').value,
-      tasa:tr.querySelector('.tasa').value,
-      nota:tr.querySelector('.nota').value.trim()
-    }))
-  };
+  return { fecha:fechaEl.value, pedido:document.getElementById('pedido').value.trim(), items:Array.from(document.querySelectorAll('#filas tr')).map(tr=>({ sku:String(tr.dataset.skuSeleccionado||'').trim(), proveedor:String(tr.dataset.proveedorSeleccionado||'').trim(), cantidad:tr.querySelector('.cantidad').value, moneda:tr.querySelector('.moneda').value, precio:tr.querySelector('.precio').value, tasa:tr.querySelector('.tasa').value, nota:tr.querySelector('.nota').value.trim() })) };
 }
 
 function validarPayload(p){
   if(!p.fecha)return 'Selecciona la fecha de compra.';
   if(!p.pedido)return 'Introduce el número de pedido del proveedor.';
   if(!p.items.length)return 'Añade al menos un artículo.';
-
-  for(let i=0;i<p.items.length;i++){
-    const x=p.items[i],n=i+1;
+  for(let i=0;i<p.items.length;i++){ const x=p.items[i],n=i+1;
     if(!x.sku)return 'Selecciona un artículo válido en la línea '+n+'.';
     if(!x.proveedor)return 'Selecciona un proveedor existente en la línea '+n+'.';
     if(!Number.isInteger(Number(x.cantidad))||Number(x.cantidad)<=0)return 'La cantidad de la línea '+n+' debe ser un entero mayor que cero.';
@@ -561,115 +314,40 @@ function validarPayload(p){
 }
 
 function prepararConfirmacion(){
-  const p=datosFormulario();
-  const err=validarPayload(p);
-  if(err){
-    mostrarEstado(err,'error');
-    return;
-  }
-
+  const p=datosFormulario(); const err=validarPayload(p);
+  if(err){ mostrarEstado(err,'error'); return; }
   const trs=Array.from(document.querySelectorAll('#filas tr'));
-  if(trs.some(tr=>!lineaCompleta(tr))){
-    mostrarEstado('Completa todos los campos de cada línea antes de continuar.','error');
-    return;
-  }
-
+  if(trs.some(tr=>!lineaCompleta(tr))){ mostrarEstado('Completa todos los campos de cada línea antes de continuar.','error'); return; }
   const total=p.items.reduce((s,x)=>s+Number(x.precio)*Number(x.cantidad)*(x.moneda==='USD'?Number(x.tasa):1),0);
   const unidades=p.items.reduce((s,x)=>s+Number(x.cantidad),0);
-
-  let html='<p><strong>Compra:</strong> '+escapar(document.getElementById('numeroCompra').value)+
-    '<br><strong>Fecha:</strong> '+escapar(p.fecha)+
-    '<br><strong>Pedido proveedor:</strong> '+escapar(p.pedido)+
-    '</p><div class="tabla-wrap"><table class="resumen-tabla"><thead><tr>'+
-    '<th>SKU</th><th>Proveedor</th><th>Cantidad</th><th>Precio unitario</th><th>Tipo de cambio</th><th>Total COP</th>'+
-    '</tr></thead><tbody>';
-
-  p.items.forEach(x=>{
-    const a=catalogos.articulos.find(y=>y.sku===x.sku);
-    const t=x.moneda==='USD'?Number(x.tasa):0;
-    const tot=Number(x.precio)*Number(x.cantidad)*(x.moneda==='USD'?t:1);
-    html+='<tr><td>'+escapar(x.sku)+(a?'<br>'+escapar(a.articulo):'')+
-      '</td><td>'+escapar(x.proveedor)+
-      '</td><td>'+escapar(x.cantidad)+
-      '</td><td>'+dinero(x.precio)+' '+x.moneda+
-      '</td><td>'+(x.moneda==='USD'?dinero(t):'—')+
-      '</td><td>'+dinero(tot)+'</td></tr>';
-  });
-
-  html+='</tbody></table></div><p><strong>Líneas:</strong> '+p.items.length+
-    ' &nbsp; <strong>Unidades:</strong> '+unidades+
-    ' &nbsp; <strong>Total general estimado:</strong> '+dinero(total)+' COP</p>';
-
-  document.getElementById('resumenConfirmacion').innerHTML=html;
-  document.getElementById('modalFondo').classList.remove('oculto');
+  let html='<p><strong>Compra:</strong> '+escapar(document.getElementById('numeroCompra').value)+'<br><strong>Fecha:</strong> '+escapar(p.fecha)+'<br><strong>Pedido proveedor:</strong> '+escapar(p.pedido)+'</p><div class="tabla-wrap"><table class="resumen-tabla"><thead><tr><th>SKU</th><th>Proveedor</th><th>Cantidad</th><th>Precio unitario</th><th>Tipo de cambio</th><th>Total COP</th></tr></thead><tbody>';
+  p.items.forEach(x=>{ const a=catalogos.articulos.find(y=>y.sku===x.sku); const t=x.moneda==='USD'?Number(x.tasa):0; const tot=Number(x.precio)*Number(x.cantidad)*(x.moneda==='USD'?t:1); html+='<tr><td>'+escapar(x.sku)+(a?'<br>'+escapar(a.articulo):'')+'</td><td>'+escapar(x.proveedor)+'</td><td>'+escapar(x.cantidad)+'</td><td>'+dinero(x.precio)+' '+x.moneda+'</td><td>'+(x.moneda==='USD'?dinero(t):'—')+'</td><td>'+dinero(tot)+'</td></tr>'; });
+  html+='</tbody></table></div><p><strong>Líneas:</strong> '+p.items.length+' &nbsp; <strong>Unidades:</strong> '+unidades+' &nbsp; <strong>Total general estimado:</strong> '+dinero(total)+' COP</p>';
+  document.getElementById('resumenConfirmacion').innerHTML=html; document.getElementById('modalFondo').classList.remove('oculto');
 }
 
-function escapar(s){
-  return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
+function escapar(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function cerrarConfirmacion(){ if(!compraEnProceso)document.getElementById('modalFondo').classList.add('oculto'); }
 
-function cerrarConfirmacion(){
-  if(!compraEnProceso)document.getElementById('modalFondo').classList.add('oculto');
-}
-
-// --- GUARDAR COMPRA EN EL SERVIDOR ---
 async function guardarCompraConfirmada(){
   if(compraEnProceso)return;
-
-  const payload=datosFormulario();
-  const err=validarPayload(payload);
-  if(err){
-    cerrarConfirmacion();
-    mostrarEstado(err,'error');
-    return;
-  }
-
-  compraEnProceso=true;
-  const btn=document.getElementById('confirmarGuardar');
-  btn.disabled=true;
-  btn.textContent='Guardando…';
-  document.getElementById('guardar').disabled=true;
-  document.getElementById('anadir').disabled=true;
-  mostrarEstado('Guardando compra…');
-
+  const payload=datosFormulario(); const err=validarPayload(payload);
+  if(err){ cerrarConfirmacion(); mostrarEstado(err,'error'); return; }
+  compraEnProceso=true; const btn=document.getElementById('confirmarGuardar'); btn.disabled=true; btn.textContent='Guardando…';
+  document.getElementById('guardar').disabled=true; document.getElementById('anadir').disabled=true; mostrarEstado('Guardando compra…');
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-      body: JSON.stringify({ accion: 'guardarCompra', payload: payload }),
-      redirect: 'follow'
-    });
-    
+    const res = await fetch(window.APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify({ accion: 'guardarCompra', payload: payload }), redirect: 'follow' });
     const r = await res.json();
-
-    compraEnProceso=false;
-    btn.disabled=false;
-    btn.textContent='Confirmar y guardar';
-    document.getElementById('modalFondo').classList.add('oculto');
-    document.getElementById('guardar').disabled=false;
-
-    if(!r || !r.correcto){
-      mostrarEstado('No se pudo confirmar: ' + (r.message || 'Error desconocido'),'error');
-      return;
-    }
-
+    compraEnProceso=false; btn.disabled=false; btn.textContent='Confirmar y guardar';
+    document.getElementById('modalFondo').classList.add('oculto'); document.getElementById('guardar').disabled=false;
+    if(!r || !r.correcto){ mostrarEstado('No se pudo confirmar: ' + (r.message || 'Error desconocido'),'error'); return; }
     mostrarEstado('Compra '+r.numeroCompra+' guardada correctamente. Líneas: '+r.cantidadLineas+'. Total estimado: '+dinero(r.totalCOP)+' COP.','ok');
-    document.getElementById('pedido').value='';
-    document.getElementById('filas').innerHTML='';
-    agregarFila();
-    actualizarNumeroCompra();
+    document.getElementById('pedido').value=''; document.getElementById('filas').innerHTML=''; agregarFila(); actualizarNumeroCompra();
   } catch (e) {
-    compraEnProceso=false;
-    btn.disabled=false;
-    btn.textContent='Confirmar y guardar';
-    document.getElementById('guardar').disabled=false;
-    document.getElementById('anadir').disabled=false;
+    compraEnProceso=false; btn.disabled=false; btn.textContent='Confirmar y guardar'; document.getElementById('guardar').disabled=false; document.getElementById('anadir').disabled=false;
     mostrarEstado('No se guardó la compra: '+mensajeError(e),'error');
   }
 }
-
-inicializarFechaCompra();
-cargarCatalogos();
 </script>
 </body>
 </html>
