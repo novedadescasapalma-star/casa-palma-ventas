@@ -53,10 +53,17 @@
 *{box-sizing:border-box}
 body{margin:0;padding:18px;font:14px Arial,sans-serif;background:var(--fondo);color:var(--texto)}
 .contenedor{max-width:1500px;margin:auto;background:#fff;border:1px solid var(--borde);border-radius:12px;overflow:hidden;box-shadow:0 5px 20px #183f3510}
-.cabecera{background:var(--verde);color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:15px}
-.marca{font:700 25px Georgia,serif}
-.sub{font-size:11px;letter-spacing:2px;margin-top:4px;opacity:.85}
-.titulo{text-align:right;font-weight:bold;font-size:17px}
+
+/* NUEVA CABECERA HOMOGÉNEA */
+.encabezado { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; padding: 20px 26px; background: var(--verde); color: white; border-bottom: 4px solid #b5c9bd; }
+.marca { font-size: 27px; font-weight: 700; letter-spacing: 2px; line-height: 1.2; font-family: Georgia, serif;}
+.submarca { margin-top: 6px; font-size: 12px; font-weight: 600; letter-spacing: 2.5px; opacity: 0.9; }
+.titulo-centro { text-align: center; font-size: 19px; font-weight: 700; letter-spacing: 1.2px; }
+.encabezado-derecha { display: flex; align-items: center; gap: 15px; justify-content: flex-end; }
+.sesion-box { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.15); padding: 6px 12px; border-radius: 8px; font-size: 11px; }
+.btn-menu { color: white; text-decoration: none; font-weight: bold; background: #245d4e; padding: 6px 12px; border-radius: 6px; font-size: 12px; transition: background 0.2s; }
+.btn-menu:hover { background: #1e4e42; }
+
 .contenido{padding:22px}
 .seccion{font-weight:bold;color:var(--verde);margin:4px 0 14px;font-size:16px}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:24px}
@@ -96,15 +103,20 @@ td input.articulo,td input.marca,td input.color,td input.talla,td input.estado,t
 .modal h2{margin-top:0;color:var(--verde)}
 .resumen-tabla{min-width:650px}
 .modal-acciones{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}
-.advertencia{background:var(--amarillo);padding:11px;border-radius:8px;margin:12px 0;font-size:13px}
-.btn-volver {color: white; text-decoration: none; font-weight: bold; margin-right: 20px; font-size: 14px; background: #245d4e; padding: 5px 10px; border-radius: 4px;}
-@media(max-width:750px){body{padding:7px}.contenido{padding:12px}.grid{grid-template-columns:1fr}}
+
+#loginOverlay { display: none; } /* Oculto por defecto para evitar parpadeo */
+
+@media(max-width:750px){
+  body{padding:7px}.contenido{padding:12px}.grid{grid-template-columns:1fr}
+  .encabezado { align-items: flex-start; flex-direction: column; gap: 16px; padding: 20px; } 
+  .titulo-centro { text-align: left; }
+  .encabezado-derecha { align-items: flex-start; flex-direction: column; text-align: left; width: 100%; } 
+}
 </style>
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
-<div id="loginOverlay" style="display:flex;position:fixed;inset:0;z-index:10000;background:rgba(23,63,53,0.95);align-items:center;justify-content:center;padding:20px;">
+<div id="loginOverlay" style="position:fixed;inset:0;z-index:10000;background:rgba(23,63,53,0.95);align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:14px;padding:30px;max-width:380px;width:100%;box-shadow:0 15px 35px rgba(0,0,0,0.3);text-align:center;">
     <h2 style="margin:0 0 6px;color:#173f35;font-size:24px;">Casa Palma</h2>
     <p style="margin:0 0 20px;color:#65736b;font-size:13px;">Control de Acceso a Compras</p>
@@ -118,15 +130,18 @@ td input.articulo,td input.marca,td input.color,td input.talla,td input.estado,t
 </div>
 
 <div class="contenedor">
-<header class="cabecera">
+<!-- NUEVA CABECERA -->
+<header class="encabezado">
   <div>
     <div class="marca">Casa Palma</div>
-    <div class="sub">MODA &amp; NOVEDADES</div>
+    <div class="submarca">MODA &amp; NOVEDADES</div>
   </div>
-  <div style="display:flex; align-items:center;">
-    <div id="infoUsuarioSesion" style="color:white;font-size:11px;margin-right:15px;opacity:0.8;"></div>
-    <a href="menu.html" class="btn-volver">&larr; Menú</a>
-    <div class="titulo">REGISTRO DE COMPRAS</div>
+  <div class="titulo-centro">REGISTRO DE COMPRAS</div>
+  <div class="encabezado-derecha">
+    <div class="sesion-box">
+      <span id="infoUsuarioSesion"></span>
+      <a href="menu.html" class="btn-menu">← Menú</a>
+    </div>
   </div>
 </header>
 
@@ -344,7 +359,7 @@ async function guardarCompraConfirmada(){
     mostrarEstado('Compra '+r.numeroCompra+' guardada correctamente. Líneas: '+r.cantidadLineas+'. Total estimado: '+dinero(r.totalCOP)+' COP.','ok');
     document.getElementById('pedido').value=''; document.getElementById('filas').innerHTML=''; agregarFila(); actualizarNumeroCompra();
   } catch (e) {
-    compraEnProceso=false; btn.disabled=false; btn.textContent='Confirmar y guardar'; document.getElementById('guardar').disabled=false; document.getElementById('anadir').disabled=false;
+    compraEnProceso=false; btn.disabled=false; btn.textContent='Confirmar y guardar'; document.getElementById('guardar').disabled=false; document.getElementById('anadir').disabled=true;
     mostrarEstado('No se guardó la compra: '+mensajeError(e),'error');
   }
 }
