@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CASA PALMA | Menú Principal</title>
-<!-- SDK de Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -38,20 +37,14 @@
       await signInWithEmailAndPassword(auth, email, pass);
     } catch (error) {
       let mensaje = 'Correo o contraseña incorrectos.';
-      if (error.code === 'auth/unauthorized-domain') {
-        mensaje = 'Dominio no autorizado en Firebase.';
-      }
+      if (error.code === 'auth/unauthorized-domain') mensaje = 'Dominio no autorizado en Firebase.';
       errorBox.textContent = mensaje;
       errorBox.style.display = 'block';
     }
   };
 
   window.cerrarSesion = async function() {
-    try {
-      await signOut(auth);
-    } finally {
-      window.location.reload();
-    }
+    try { await signOut(auth); } finally { window.location.reload(); }
   };
 
   onAuthStateChanged(auth, (user) => {
@@ -60,10 +53,12 @@
     const infoUsuario = document.getElementById('infoUsuarioSesion');
 
     if (user) {
+      // Si hay usuario, ocultamos el login y mostramos el menú
       overlay.style.display = 'none';
       contenido.style.display = 'flex';
       if (infoUsuario) infoUsuario.textContent = 'Sesión: ' + user.email;
     } else {
+      // Si no hay usuario, mostramos el login y ocultamos el menú
       overlay.style.display = 'flex';
       contenido.style.display = 'none';
       if (infoUsuario) infoUsuario.textContent = '';
@@ -71,69 +66,21 @@
   });
 </script>
 <style>
-  :root {
-    --verde: #173f35;
-    --verde-claro: #245d4e;
-    --fondo: #f3f6f4;
-    --blanco: #ffffff;
-    --texto: #20312b;
-    --rojo: #b42318;
-  }
+  :root { --verde: #173f35; --verde-claro: #245d4e; --fondo: #f3f6f4; --blanco: #ffffff; --texto: #20312b; --rojo: #b42318; }
   * { box-sizing: border-box; }
-  body {
-    margin: 0; padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: var(--fondo);
-    color: var(--texto);
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  header {
-    background-color: var(--verde);
-    color: var(--blanco);
-    padding: 30px 20px;
-    text-align: center;
-    border-bottom: 5px solid #b5c9bd;
-    position: relative;
-  }
+  body { margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: var(--fondo); color: var(--texto); display: flex; flex-direction: column; min-height: 100vh; }
+  header { background-color: var(--verde); color: var(--blanco); padding: 30px 20px; text-align: center; border-bottom: 5px solid #b5c9bd; position: relative; }
   h1 { margin: 0; font-family: Georgia, serif; font-size: 32px; letter-spacing: 2px; }
   p.sub { margin: 10px 0 0 0; font-size: 14px; letter-spacing: 3px; opacity: 0.9; }
   
-  .sesion-info {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .btn-cerrar {
-    background: var(--rojo); color: white; border: 0; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;
-  }
+  .sesion-info { position: absolute; top: 20px; right: 20px; font-size: 11px; display: flex; align-items: center; gap: 10px; }
+  .btn-cerrar { background: var(--rojo); color: white; border: 0; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-  main {
-    flex: 1;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: center;
-    gap: 25px;
-    padding: 40px 20px;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
+  main { flex: 1; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 25px; padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
 
-  /* Estilos de Login */
-  #loginOverlay {
-    position: fixed; inset: 0; background: rgba(23,63,53,0.95);
-    display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 1000;
-  }
-  .login-box {
-    background: white; border-radius: 14px; padding: 30px; max-width: 380px; width: 100%;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center;
-  }
+  /* Login: Ahora está oculto por defecto (display: none) */
+  #loginOverlay { display: none; position: fixed; inset: 0; background: rgba(23,63,53,0.95); align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
+  .login-box { background: white; border-radius: 14px; padding: 30px; max-width: 380px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center; }
   .login-box h2 { margin: 0 0 6px; color: var(--verde); font-size: 24px; }
   .login-box p { margin: 0 0 20px; color: #65736b; font-size: 13px; }
   .campo { display: flex; flex-direction: column; gap: 6px; text-align: left; margin-bottom: 12px; }
@@ -141,24 +88,8 @@
   .campo input { padding: 10px; border: 1px solid #cbd5cf; border-radius: 7px; font-size: 15px; }
   .btn-login { width: 100%; padding: 12px; background: var(--verde); color: white; border: 0; border-radius: 7px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 10px; }
 
-  /* Estilos de Tarjetas */
-  .tarjeta {
-    background: var(--blanco);
-    border: 1px solid #dce3df;
-    border-radius: 12px;
-    width: 280px;
-    padding: 30px 20px;
-    text-align: center;
-    text-decoration: none;
-    color: var(--texto);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  }
-  .tarjeta:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(23,63,53,0.15);
-    border-color: var(--verde-claro);
-  }
+  .tarjeta { background: var(--blanco); border: 1px solid #dce3df; border-radius: 12px; width: 280px; padding: 30px 20px; text-align: center; text-decoration: none; color: var(--texto); box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+  .tarjeta:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(23,63,53,0.15); border-color: var(--verde-claro); }
   .tarjeta .icono { font-size: 40px; margin-bottom: 15px; display: block; }
   .tarjeta h2 { margin: 0 0 10px 0; font-size: 20px; color: var(--verde); }
   .tarjeta p { margin: 0; font-size: 13px; color: #65736b; line-height: 1.5; }
@@ -170,19 +101,12 @@
 </head>
 <body>
 
-<!-- PANTALLA DE LOGIN -->
 <div id="loginOverlay">
   <div class="login-box">
     <h2>Casa Palma</h2>
     <p>Control de Acceso al Sistema</p>
-    <div class="campo">
-      <label>Correo electrónico</label>
-      <input id="loginEmail" type="email" placeholder="usuario@casapalma.app">
-    </div>
-    <div class="campo">
-      <label>Contraseña</label>
-      <input id="loginPassword" type="password" placeholder="••••••••">
-    </div>
+    <div class="campo"><label>Correo electrónico</label><input id="loginEmail" type="email" placeholder="usuario@casapalma.app"></div>
+    <div class="campo"><label>Contraseña</label><input id="loginPassword" type="password" placeholder="••••••••"></div>
     <button class="btn-login" onclick="ejecutarLogin()">Iniciar Sesión</button>
     <div id="loginError" style="margin-top:12px;color:var(--rojo);font-size:13px;display:none;"></div>
   </div>
@@ -203,27 +127,15 @@
     <h2>Registrar Ventas</h2>
     <p>Facturación, medios de pago y comprobantes.</p>
   </a>
-
   <a href="compras.html" class="tarjeta">
     <span class="icono">📦</span>
     <h2>Registrar Compras</h2>
     <p>Ingreso de mercancía de proveedores.</p>
   </a>
-
-  <div class="tarjeta deshabilitada">
-    <span class="icono">🚚</span>
-    <h2>Recepción</h2>
-    <p>Validar pedidos recibidos.</p>
-  </div>
-
-  <div class="tarjeta deshabilitada">
-    <span class="icono">🔄</span>
-    <h2>Devoluciones</h2>
-    <p>Gestión de cambios y reembolsos.</p>
-  </div>
+  <div class="tarjeta deshabilitada"><span class="icono">🚚</span><h2>Recepción</h2><p>Validar pedidos recibidos.</p></div>
+  <div class="tarjeta deshabilitada"><span class="icono">🔄</span><h2>Devoluciones</h2><p>Gestión de cambios y reembolsos.</p></div>
 </main>
 
 <footer>Sistema Interno &copy; 2026 CASA PALMA</footer>
-
 </body>
 </html>
