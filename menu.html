@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASA PALMA | Menú Principal</title>
+<style>
+  :root {
+    --verde: #173f35;
+    --verde-claro: #245d4e;
+    --fondo: #f3f6f4;
+    --blanco: #ffffff;
+    --texto: #20312b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--fondo);
+    color: var(--texto);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    background-color: var(--verde);
+    color: var(--blanco);
+    padding: 30px 20px;
+    text-align: center;
+    border-bottom: 5px solid #b5c9bd;
+  }
+  h1 { margin: 0; font-family: Georgia, serif; font-size: 32px; letter-spacing: 2px; }
+  p.sub { margin: 10px 0 0 0; font-size: 14px; letter-spacing: 3px; opacity: 0.9; }
+  
+  main {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    gap: 25px;
+    padding: 40px 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .tarjeta {
+    background: var(--blanco);
+    border: 1px solid #dce3df;
+    border-radius: 12px;
+    width: 280px;
+    padding: 30px 20px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--texto);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+  .tarjeta:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(23,63,53,0.15);
+    border-color: var(--verde-claro);
+  }
+  .tarjeta .icono {
+    font-size: 40px;
+    margin-bottom: 15px;
+    display: block;
+  }
+  .tarjeta h2 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    color: var(--verde);
+  }
+  .tarjeta p {
+    margin: 0;
+    font-size: 13px;
+    color: #65736b;
+    line-height: 1.5;
+  }
+  
+  .deshabilitada {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+  }
+  .deshabilitada:hover {
+    transform: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border-color: #dce3df;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: #65736b;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CASA PALMA</h1>
+  <p class="sub">MODA &amp; NOVEDADES</p>
+</header>
+
+<main>
+  <!-- Tarjeta de Ventas (Activa) -->
+  <a href="index.html" class="tarjeta">
+    <span class="icono">🛒</span>
+    <h2>Registrar Ventas</h2>
+    <p>Facturación, medios de pago y comprobantes.</p>
+  </a>
+
+  <!-- Tarjeta de Compras (Activa, la crearemos ahora) -->
+  <a href="compras.html" class="tarjeta">
+    <span class="icono">📦</span>
+    <h2>Registrar Compras</h2>
+    <p>Ingreso de mercancía de proveedores.</p>
+  </a>
+
+  <!-- Tarjetas futuras (Deshabilitadas por ahora) -->
+  <div class="tarjeta deshabilitada">
+    <span class="icono">🚚</span>
+    <h2>Recepción</h2>
+    <p>Validar pedidos recibidos.</p>
+  </div>
+
+  <div class="tarjeta deshabilitada">
+    <span class="icono">🔄</span>
+    <h2>Devoluciones</h2>
+    <p>Gestión de cambios y reembolsos.</p>
+  </div>
+</main>
+
+<footer>
+  Sistema Interno &copy; 2026 CASA PALMA
+</footer>
+
+</body>
+</html>
+
