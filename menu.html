@@ -53,12 +53,10 @@
     const infoUsuario = document.getElementById('infoUsuarioSesion');
 
     if (user) {
-      // Si hay usuario, ocultamos el login y mostramos el menú
       overlay.style.display = 'none';
       contenido.style.display = 'flex';
       if (infoUsuario) infoUsuario.textContent = 'Sesión: ' + user.email;
     } else {
-      // Si no hay usuario, mostramos el login y ocultamos el menú
       overlay.style.display = 'flex';
       contenido.style.display = 'none';
       if (infoUsuario) infoUsuario.textContent = '';
@@ -69,24 +67,38 @@
   :root { --verde: #173f35; --verde-claro: #245d4e; --fondo: #f3f6f4; --blanco: #ffffff; --texto: #20312b; --rojo: #b42318; }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: var(--fondo); color: var(--texto); display: flex; flex-direction: column; min-height: 100vh; }
+  
   header { background-color: var(--verde); color: var(--blanco); padding: 30px 20px; text-align: center; border-bottom: 5px solid #b5c9bd; position: relative; }
   h1 { margin: 0; font-family: Georgia, serif; font-size: 32px; letter-spacing: 2px; }
   p.sub { margin: 10px 0 0 0; font-size: 14px; letter-spacing: 3px; opacity: 0.9; }
   
   .sesion-info { position: absolute; top: 20px; right: 20px; font-size: 11px; display: flex; align-items: center; gap: 10px; }
-  .btn-cerrar { background: var(--rojo); color: white; border: 0; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+  .btn-cerrar { background: var(--rojo); color: white; border: 0; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
+  .btn-cerrar:hover { opacity: 0.8; }
 
   main { flex: 1; display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 25px; padding: 40px 20px; max-width: 1000px; margin: 0 auto; }
 
-  /* Login: Ahora está oculto por defecto (display: none) */
-  #loginOverlay { display: none; position: fixed; inset: 0; background: rgba(23,63,53,0.95); align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
-  .login-box { background: white; border-radius: 14px; padding: 30px; max-width: 380px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.3); text-align: center; }
+  /* --- FONDO DE LOGIN CORREGIDO --- */
+  /* Cambiamos a un color sólido para que no se transparente el logo del fondo */
+  #loginOverlay { 
+    display: none; 
+    position: fixed; 
+    inset: 0; 
+    background: var(--verde); /* Color sólido en lugar de rgba */
+    align-items: center; 
+    justify-content: center; 
+    padding: 20px; 
+    z-index: 1000; 
+  }
+  
+  .login-box { background: white; border-radius: 14px; padding: 30px; max-width: 380px; width: 100%; box-shadow: 0 15px 35px rgba(0,0,0,0.4); text-align: center; }
   .login-box h2 { margin: 0 0 6px; color: var(--verde); font-size: 24px; }
   .login-box p { margin: 0 0 20px; color: #65736b; font-size: 13px; }
   .campo { display: flex; flex-direction: column; gap: 6px; text-align: left; margin-bottom: 12px; }
   .campo label { font-size: 12px; font-weight: bold; color: #65736b; }
   .campo input { padding: 10px; border: 1px solid #cbd5cf; border-radius: 7px; font-size: 15px; }
-  .btn-login { width: 100%; padding: 12px; background: var(--verde); color: white; border: 0; border-radius: 7px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 10px; }
+  .btn-login { width: 100%; padding: 12px; background: var(--verde); color: white; border: 0; border-radius: 7px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+  .btn-login:hover { background: var(--verde-claro); }
 
   .tarjeta { background: var(--blanco); border: 1px solid #dce3df; border-radius: 12px; width: 280px; padding: 30px 20px; text-align: center; text-decoration: none; color: var(--texto); box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
   .tarjeta:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(23,63,53,0.15); border-color: var(--verde-claro); }
