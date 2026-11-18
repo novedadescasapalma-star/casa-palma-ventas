@@ -232,7 +232,7 @@ td input, td select { min-width: 68px; padding: 7px; font-size: 14px; }
 
 <script>
 let carrito = [];
-let datosComprobantePendiente = null;
+let datosComprobanteParaImprimir = null;
 let pagos = [];
 let catalogoMemoria = [];
 
@@ -395,7 +395,7 @@ function procesarYGuardarVenta() {
     return resultado;
   })
   .then(resultado => {
-    datosComprobantePendiente = { numeroVenta: resultado.numeroVenta, numeroRecibo: resultado.numeroRecibo, fecha: payload.fecha + ' ' + payload.horaLocal, cliente: payload.cliente || 'Mostrador', items: lineasParaComprobante, subtotal: totales.subtotalBruto, cantidadTotalItems: totales.cantidadTotalItems, descuentoTotal: totales.totalDescuentos, total: resultado.total, medioPago: medioPago };
+    datosComprobanteParaImprimir = { numeroVenta: resultado.numeroVenta, numeroRecibo: resultado.numeroRecibo, fecha: payload.fecha + ' ' + payload.horaLocal, cliente: payload.cliente || 'Mostrador', items: lineasParaComprobante, subtotal: totales.subtotalBruto, cantidadTotalItems: totales.cantidadTotalItems, descuentoTotal: totales.totalDescuentos, total: resultado.total, medioPago: medioPago };
     if (window.guardarVentaEnFirestore) window.guardarVentaEnFirestore(datosComprobantePendiente);
     document.getElementById('estadoGeneral').textContent = 'Venta registrada.';
     document.getElementById('tituloComprobante').textContent = 'Venta ' + resultado.numeroVenta + ' registrada';
@@ -424,8 +424,8 @@ function generarHTMLComprobantePDF(d) {
 }
 
 function abrirComprobante(tipo) {
-  if (!datosComprobantePendiente) { alert('No hay datos disponibles.'); return; }
-  const datos = datosComprobantePendiente;
+  if (!datosComprobanteParaImprimir) { alert('No hay datos disponibles.'); return; }
+  const datos = datosComprobanteParaImprimir;
   const html = tipo === 'pdf' ? generarHTMLComprobantePDF(datos) : generarHTMLTicketTermico(datos);
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -435,9 +435,9 @@ function abrirComprobante(tipo) {
   document.getElementById('modalComprobante').classList.remove('visible');
 }
 
-function cerrarOpcionesComprobante() { document.getElementById('modalComprobante').classList.remove('visible'); datosComprobantePendiente = null; }
+function cerrarOpcionesComprobante() { document.getElementById('modalComprobante').classList.remove('visible'); datosComprobanteParaImprimir = null; }
 function reiniciarFormulario() {
-  carrito = []; pagos = []; datosComprobantePendiente = null;
+  carrito = []; pagos = [];
   document.getElementById('fecha').value = fechaLocal();
   document.getElementById('numeroVenta').value = 'Se asignará al guardar';
   document.getElementById('cliente').value = ''; document.getElementById('sku').value = '';
