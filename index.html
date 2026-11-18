@@ -68,7 +68,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; padding: 18px; background: var(--fondo); color: var(--texto); font-family: Arial, sans-serif; font-size: 15px; }
 
-/* NUEVA CABECERA HOMOGÉNEA */
+/* CABECERA HOMOGÉNEA */
 .encabezado { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; padding: 20px 26px; background: var(--verde); color: var(--blanco); border-radius: 0; margin-bottom: 20px; border-bottom: 4px solid #b5c9bd; }
 .marca { font-size: 27px; font-weight: 700; letter-spacing: 2px; line-height: 1.2; }
 .submarca { margin-top: 6px; font-size: 12px; font-weight: 600; letter-spacing: 2.5px; opacity: 0.9; }
@@ -79,7 +79,6 @@ body { margin: 0; padding: 18px; background: var(--fondo); color: var(--texto); 
 .btn-menu { color: white; text-decoration: none; font-weight: bold; background: #245d4e; padding: 6px 12px; border-radius: 6px; font-size: 12px; transition: background 0.2s; }
 .btn-menu:hover { background: #1e4e42; }
 
-/* Resto de estilos iguales */
 .bloque { background: var(--blanco); border: 1px solid var(--borde); border-radius: 12px; padding: 17px; margin-bottom: 15px; }
 .titulo-bloque { display: flex; align-items: center; gap: 9px; margin: 0 0 15px; font-size: 19px; font-weight: 700; }
 .numero { display: inline-flex; align-items: center; justify-content: center; width: 27px; height: 27px; border-radius: 50%; background: var(--verde-claro); color: var(--verde); font-size: 12px; flex-shrink: 0; }
@@ -119,7 +118,7 @@ td input, td select { min-width: 68px; padding: 7px; font-size: 14px; }
 .estado-revision.error { display: block; color: var(--rojo); background: #fff0ee; border-color: #f4c7c3; }
 #modalComprobante.visible { display: flex !important; }
 
-#loginOverlay { display: none; } /* Oculto por defecto para evitar parpadeo */
+#loginOverlay { display: none; } 
 
 @media (max-width: 768px) { 
   body { padding: 10px; } 
@@ -145,7 +144,6 @@ td input, td select { min-width: 68px; padding: 7px; font-size: 14px; }
   </div>
 </div>
 
-<!-- NUEVA CABECERA -->
 <div class="encabezado">
   <div>
     <div class="marca">CASA PALMA</div>
@@ -232,7 +230,8 @@ td input, td select { min-width: 68px; padding: 7px; font-size: 14px; }
 
 <script>
 let carrito = [];
-let datosComprobanteParaImprimir = null;
+// LA CLAVE DEL ARREGLO: Usamos una variable separada para no perder los datos al limpiar
+let datosComprobanteParaImprimir = null; 
 let pagos = [];
 let catalogoMemoria = [];
 
@@ -395,8 +394,17 @@ function procesarYGuardarVenta() {
     return resultado;
   })
   .then(resultado => {
-    datosComprobanteParaImprimir = { numeroVenta: resultado.numeroVenta, numeroRecibo: resultado.numeroRecibo, fecha: payload.fecha + ' ' + payload.horaLocal, cliente: payload.cliente || 'Mostrador', items: lineasParaComprobante, subtotal: totales.subtotalBruto, cantidadTotalItems: totales.cantidadTotalItems, descuentoTotal: totales.totalDescuentos, total: resultado.total, medioPago: medioPago };
-    if (window.guardarVentaEnFirestore) window.guardarVentaEnFirestore(datosComprobantePendiente);
+    // Guardamos los datos en la variable a salvo del reinicio
+    datosComprobanteParaImprimir = { 
+      numeroVenta: resultado.numeroVenta, numeroRecibo: resultado.numeroRecibo, 
+      fecha: payload.fecha + ' ' + payload.horaLocal, cliente: payload.cliente || 'Mostrador', 
+      items: lineasParaComprobante, subtotal: totales.subtotalBruto, 
+      cantidadTotalItems: totales.cantidadTotalItems, descuentoTotal: totales.totalDescuentos, 
+      total: resultado.total, medioPago: medioPago 
+    };
+    
+    if (window.guardarVentaEnFirestore) window.guardarVentaEnFirestore(datosComprobanteParaImprimir);
+    
     document.getElementById('estadoGeneral').textContent = 'Venta registrada.';
     document.getElementById('tituloComprobante').textContent = 'Venta ' + resultado.numeroVenta + ' registrada';
     document.getElementById('detalleComprobante').textContent = 'Recibo ' + resultado.numeroRecibo + ' · Total: ' + dinero(resultado.total) + '. Elige cómo entregar el comprobante.';
@@ -424,7 +432,7 @@ function generarHTMLComprobantePDF(d) {
 }
 
 function abrirComprobante(tipo) {
-  if (!datosComprobanteParaImprimir) { alert('No hay datos disponibles.'); return; }
+  if (!datosComprobanteParaImprimir) { alert('No hay datos disponibles para imprimir.'); return; }
   const datos = datosComprobanteParaImprimir;
   const html = tipo === 'pdf' ? generarHTMLComprobantePDF(datos) : generarHTMLTicketTermico(datos);
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
@@ -435,9 +443,15 @@ function abrirComprobante(tipo) {
   document.getElementById('modalComprobante').classList.remove('visible');
 }
 
-function cerrarOpcionesComprobante() { document.getElementById('modalComprobante').classList.remove('visible'); datosComprobanteParaImprimir = null; }
+function cerrarOpcionesComprobante() { 
+  document.getElementById('modalComprobante').classList.remove('visible'); 
+  // Solo borramos los datos si el usuario dice "Ahora no"
+  datosComprobanteParaImprimir = null; 
+}
+
 function reiniciarFormulario() {
   carrito = []; pagos = [];
+  // OJO: No borramos datosComprobanteParaImprimir aquí para que el PDF funcione
   document.getElementById('fecha').value = fechaLocal();
   document.getElementById('numeroVenta').value = 'Se asignará al guardar';
   document.getElementById('cliente').value = ''; document.getElementById('sku').value = '';
